@@ -20,6 +20,53 @@ def menu_admin ():
 
     print ("\n 0. Salir")
 
+    op = -1
+    while op != 0:
+        op = -1
+        op = int(input("Seleccione una opción: "))
+
+        if op == 1:
+            auth.register()
+            continue
+
+        if op == 2:
+            print("Administrando usuarios existentes...")
+            #Lógica para administrar usuarios existentes
+            continue
+
+        if op == 3:
+            print("Registrando un nuevo equipo...")
+            #Lógica para registrar un nuevo equipo
+            continue
+
+        if op == 4:
+            print("Consultando equipos existentes...")
+            #Lógica para consultar equipos existentes
+            continue
+
+        if op == 5:
+            print("Aprobando / rechazando préstamos...")
+            #Lógica para aprobar / rechazar préstamos
+            continue
+
+        if op == 6:
+            print("Consultando préstamos existentes...")
+            #Lógica para consultar préstamos existentes
+            continue
+
+        if op == 7:
+            print("Ingresando devoluciones...")
+            #Lógica para ingresar devoluciones
+            continue
+
+        if op == 0:
+            print("Saliendo del sistema...")
+            exit()
+
+        else:
+            print("Opción no válida. Por favor, seleccione una opción válida.")
+
+
 
 
 def menu_autenticacion ():
@@ -56,13 +103,39 @@ def menu_usuario ():
     #Ir a la base de datos y comprobar si tiene prestamos atrasados
     #Si tiene prestamos atrasados, no puede solicitar nuevos prestamos.
 
-      
+    op = -1
+    while op != 0:
+        op = -1
+        print("Opciones disponibles")
+        print("1. Consultar equipos disponibles")
+        print("2. Solicitar un préstamo")
+        print("3. Consultar mis préstamos existentes")
+        print("0. Salir")
 
-    print("Opciones disponibles")
-    print("1. Consultar equipos disponibles")
-    print("2. Solicitar un préstamo")
-    print("3. Consultar mis préstamos existentes")
-    print("0. Salir")
+        op = int(input("Seleccione una opción: "))
+
+        if op == 1:
+            print("Consultando equipos disponibles...")
+            #Ir a la base de datos y consultar los equipos disponibles
+            continue
+
+        if op == 2:
+            print("Solicitando un préstamo...")
+            #Lógica para solicitar un préstamo
+            continue
+
+        if op == 3:
+            print("Consultando mis préstamos existentes...")
+            #Ir a la base de datos y consultar los préstamos del usuario
+            continue
+
+        if op == 0:
+            print("Saliendo del sistema...")
+            exit()
+
+        else:
+            print("Opción no válida. Por favor, seleccione una opción válida.")
+
 
 
 def main ():

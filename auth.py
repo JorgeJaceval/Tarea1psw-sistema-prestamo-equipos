@@ -28,9 +28,8 @@ def register ():
         if not password:
             print("Error: Nombre de usuario y contraseña no pueden estar vacíos.")
             continue
-        
         #Todos los usuarios registrados tendrán el rol de "user" por defecto.
-
+        
         autenticacion_simple[user] = {"password": password, "rol": "user"}
 
         print("Registro exitoso. Ahora puede iniciar sesión.")
