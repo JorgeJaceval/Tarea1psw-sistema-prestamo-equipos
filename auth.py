@@ -1,4 +1,4 @@
-
+from getpass import getpass
 '''
 "admin" : {
     "password" : "hash",
@@ -6,6 +6,14 @@
 }
 '''
 autenticacion_simple = {
+    "admin": {
+        "password": "admin123",
+        "rol": "admin"
+    },
+    "joaco": {
+        "password": "joaco123",
+        "rol": "user"
+    }
 
 }
 
@@ -23,7 +31,7 @@ def register ():
             print("Error: El nombre de usuario ya existe.")
             continue
 
-        password = input("Ingrese su contraseña: ").strip()
+        password = getpass.getpass("Ingrese su contraseña: ")
 
         if not password:
             print("Error: Nombre de usuario y contraseña no pueden estar vacíos.")
@@ -41,10 +49,10 @@ def register ():
 def login (user, password):
     #Lógica de inicio de sesión simple.
     if user in autenticacion_simple and autenticacion_simple[user]["password"] == password:
-        print("Inicio de sesión exitoso.")
+        print("Inicio de sesión exitoso.\n ")
         return True
     else:
-        print("Error: Nombre de usuario o contraseña incorrectos.")
+        print("Error: Nombre de usuario o contraseña incorrectos, intente nuevamente. \n")
         return False
 
     
