@@ -12,7 +12,7 @@ autenticacion_simple = {
 def register ():
     #Lógica de autenticación simple.
     while True:
-        user = input("Ingrese su nombre de usuario: ")
+        user = input("Ingrese su nombre de usuario: ").strip()
         print()
 
         if not user:
@@ -28,17 +28,19 @@ def register ():
         if not password:
             print("Error: Nombre de usuario y contraseña no pueden estar vacíos.")
             continue
+        
         #Todos los usuarios registrados tendrán el rol de "user" por defecto.
         
         autenticacion_simple[user] = {"password": password, "rol": "user"}
 
         print("Registro exitoso. Ahora puede iniciar sesión.")
+        return
 
 
 
 def login (user, password):
     #Lógica de inicio de sesión simple.
-    if user in autenticacion_simple and autenticacion_simple[user] == password:
+    if user in autenticacion_simple and autenticacion_simple[user]["password"] == password:
         print("Inicio de sesión exitoso.")
         return True
     else:
@@ -48,5 +50,4 @@ def login (user, password):
     
 
     
-
 

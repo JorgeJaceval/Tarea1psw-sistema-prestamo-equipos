@@ -1,0 +1,9 @@
+Estructura de la BD's:
+
+1) BD productos
+id  | equipos | existencias totales | existencias disponibles
+
+
+2 ) BD prestamos
+
+id | equipo_id | usuario |fecha_desde |fecha_hasta | estado 

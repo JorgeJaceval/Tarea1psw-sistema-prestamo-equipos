@@ -1,5 +1,6 @@
 #Interfaz Menú via CLI.
 import auth
+import prestamos
 
 def menu_admin ():
     #Funcionalidades: Registrar y administrar usuarios
@@ -70,8 +71,7 @@ def menu_admin ():
 
 
 def menu_autenticacion ():
-    while op != 3:
-        op = 0
+    while True:
         print ("1. Registrar")
         print ("2. Iniciar sesión")
         print ("3. Salir")
@@ -84,8 +84,13 @@ def menu_autenticacion ():
 
         elif option == "2":
             print("Iniciando sesion...")
-            if not auth.login(input("Ingrese su nombre de usuario: "), input("Ingrese su contraseña: ")):
+            usuario = input("Ingrese su nombre de usuario: ").strip()
+            password = input("Ingrese su contraseña: ").strip()
+
+            if not auth.login(usuario, password):
                 continue
+            else:
+                return usuario
         
         elif option == "3":
             print("Saliendo del sistema...")
@@ -95,13 +100,14 @@ def menu_autenticacion ():
             
 
 
-def menu_usuario ():
+def menu_usuario (user):
     #Funcionalidades: Consultar equipos, solicitar préstamos y consultar préstamos.
     #Comprobar antes si tiene prestamos atrasados
 
     print ("Comprobando si tiene préstamos atrasados...")
     #Ir a la base de datos y comprobar si tiene prestamos atrasados
     #Si tiene prestamos atrasados, no puede solicitar nuevos prestamos.
+    prestamos.prestamos_activos(user)
 
     op = -1
     while op != 0:
@@ -141,10 +147,14 @@ def menu_usuario ():
 def main ():
     #Funcionalidad principal del sistema.
     print("Bienvenido al sistema de préstamos de equipos.")
-    if menu_autenticacion():
-        rol = auth.autenticacion_simple["user"]["rol"]
-        if rol == "admin":
-            menu_admin()
+    usuario = menu_autenticacion()
+    rol = auth.autenticacion_simple[usuario]["rol"]
 
-        else:
-            menu_usuario()
+    if rol == "admin":
+        menu_admin()
+    else:
+        menu_usuario(usuario)
+
+
+if __name__ == "__main__":
+    main()
