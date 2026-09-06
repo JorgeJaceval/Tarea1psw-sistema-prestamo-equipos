@@ -1,21 +1,54 @@
 from getpass import getpass
 '''
 "admin" : {
+    "id" : 1,
     "password" : "hash",
     "rol" : "admin"
 }
 '''
 autenticacion_simple = {
     "admin": {
+        "id" : 1,
         "password": "admin123",
         "rol": "admin"
     },
     "joaco": {
+        "id" : 2,
         "password": "joaco123",
+        "rol": "user"
+    },
+    "juan": {
+        "id" : 3,
+        "password": "juan123",
+        "rol": "user"
+    },
+    "maria": {
+        "id" : 4,
+        "password": "maria123",
+        "rol": "user"
+    },
+    "pedro": {
+        "id" : 5,
+        "password": "pedro123",
+        "rol": "user"
+    },
+    "ana": {
+        "id" : 6,
+        "password": "ana123",
         "rol": "user"
     }
 
 }
+
+def obtener_siguiente_id_usuario():
+    mayor_id = 0
+
+    for datos in autenticacion_simple.values():
+        if "id" in datos:
+            mayor_id = max(mayor_id, int(datos["id"]))
+
+    return mayor_id + 1
+
 
 def register ():
     #Lógica de autenticación simple.
@@ -31,7 +64,7 @@ def register ():
             print("Error: El nombre de usuario ya existe.")
             continue
 
-        password = getpass.getpass("Ingrese su contraseña: ")
+        password = getpass("Ingrese su contraseña: ")
 
         if not password:
             print("Error: Nombre de usuario y contraseña no pueden estar vacíos.")
@@ -39,7 +72,11 @@ def register ():
         
         #Todos los usuarios registrados tendrán el rol de "user" por defecto.
         
-        autenticacion_simple[user] = {"password": password, "rol": "user"}
+        autenticacion_simple[user] = {
+            "id": obtener_siguiente_id_usuario(),
+            "password": password,
+            "rol": "user"
+        }
 
         print("Registro exitoso. Ahora puede iniciar sesión.")
         return
@@ -67,8 +104,9 @@ def administrar_usuarios():
     usuarios = list(autenticacion_simple.keys())
 
     for indice, user in enumerate(usuarios, start=1):
+        user_id = autenticacion_simple[user]["id"]
         rol = autenticacion_simple[user]["rol"]
-        print(f"{indice}. {user} - Rol: {rol}")
+        print(f"{indice}. {user} - ID: {user_id} - Rol: {rol}")
 
     op = input("Ingrese el número del usuario que desea eliminar o actualizar (o '0' para salir): ")
 

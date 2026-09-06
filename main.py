@@ -99,7 +99,7 @@ def menu_autenticacion ():
             
 
 
-def menu_usuario (user):
+def menu_usuario (user_id):
     #Funcionalidades: Consultar equipos, solicitar préstamos y consultar préstamos.
 
     
@@ -112,10 +112,11 @@ def menu_usuario (user):
         print("Opciones disponibles")
         print("1. Consultar equipos disponibles")
         print("2. Solicitar un préstamo")
-        print("3. Consultar mis préstamos existentes")
+        print("3. Consultar mis préstamos existentes / solicitudes")
         print("0. Salir \n")
 
-        op = int(input("Seleccione una opción: \n"))
+        op = int(input("Seleccione una opción: "))
+        print ("")
 
         if op == 1:
             print("Consultando equipos disponibles...")
@@ -132,8 +133,8 @@ def menu_usuario (user):
             print ("Comprobando si puede solicitar nuevos préstamos...\n")
             #Ir a la base de datos y comprobar si tiene prestamos atrasados
             #Si tiene prestamos atrasados, no puede solicitar nuevos prestamos.
-            prestamos_activos = prestamos.prestamos_activos(user)
-            prestamos_pendientes = prestamos.prestamos_pendientes(user)
+            prestamos_activos = prestamos.prestamos_activos(user_id)
+            prestamos_pendientes = prestamos.prestamos_pendientes(user_id)
 
             if len(prestamos_activos) == 0:
                 print("No tiene préstamos activos, puede solicitar nuevos préstamos. \n")
@@ -158,8 +159,9 @@ def menu_usuario (user):
 
             for indice, equipo in enumerate(equipos, start=1):
                 print(f"{indice}. {equipo[1]} (Disponibles: {equipo[3]})")
+            print ("")
 
-            seleccion = input("Ingrese el número del equipo que desea solicitar: \n")
+            seleccion = input("Ingrese el número del equipo que desea solicitar:")
 
             if not seleccion.isdigit():
                 print("Opción no válida.")
@@ -172,19 +174,20 @@ def menu_usuario (user):
                 continue
 
             equipo = equipos[seleccion - 1]
-            prestamos.solicitar_prestamo(user, equipo)
+            prestamos.solicitar_prestamo(user_id, equipo)
             continue
 
         if op == 3:
-            print("Consultando mis préstamos existentes...")
-            print ("Sus prestamos activos son: \n")
-            prestamos_activos = prestamos.prestamos_activos(user)
+            print("Consultando mis préstamos existentes / solicitudes...")
+            prestamos_usuario = prestamos.prestamos_usuario(user_id)
 
-            if len (prestamos_activos) == 0:
-                print("No tiene préstamos activos.")
+            if len(prestamos_usuario) == 0:
+                print("No tiene préstamos ni solicitudes registradas.")
             else:
-                print("Tiene préstamos activos:")
-                print (prestamos_activos)
+                print("Tiene préstamos / solicitudes registradas:")
+                for prestamo in prestamos_usuario:
+                    print(f"ID: {prestamo[0]} | Equipo: {prestamo[1]} | Estado: {prestamo[5]}")
+                print ("")
 
             continue
 
@@ -204,12 +207,14 @@ def main ():
     print("****************************************************\n")
     
     usuario = menu_autenticacion()
-    rol = auth.autenticacion_simple[usuario]["rol"]
+    usuario_autenticado = auth.autenticacion_simple[usuario]
+    rol = usuario_autenticado["rol"]
+    user_id = usuario_autenticado["id"]
 
     if rol == "admin":
         menu_admin()
     else:
-        menu_usuario(usuario)
+        menu_usuario(user_id)
 
 
 if __name__ == "__main__":

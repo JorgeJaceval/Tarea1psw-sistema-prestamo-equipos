@@ -6,7 +6,7 @@ id  | equipos | existencias totales | existencias disponibles
 
 2 ) BD prestamos
 
-id | equipo_id | usuario |fecha_desde |fecha_hasta | estado 
+id | equipo | id_usuario |fecha_desde |fecha_hasta | estado 
 
 
 *Estado -> activo | finalizado

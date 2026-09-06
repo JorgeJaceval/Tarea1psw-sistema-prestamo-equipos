@@ -1,8 +1,8 @@
-1,notebook,juan,2026-09-01,2026-09-10,activo
-2,proyector,maria,2026-09-03,2026-09-12,pendiente
-3,camara,juan,2026-08-20,2026-08-28,finalizado
-4,notebook,pedro,2026-09-05,2026-09-15,pendiente
-5,tablet,maria,2026-08-25,2026-09-02,cancelado
-6,camara,ana,2026-09-02,2026-09-09,activo
-7,notebook,joaco,fecha_solicitud,fecha_devolucion,pendiente
-8,notebook,joaco,fecha_solicitud,fecha_devolucion,pendiente
+1,notebook,3,2026-09-01,2026-09-10,activo
+2,proyector,4,2026-09-03,2026-09-12,pendiente
+3,camara,3,2026-08-20,2026-08-28,finalizado
+4,notebook,5,2026-09-05,2026-09-15,pendiente
+5,tablet,4,2026-08-25,2026-09-02,cancelado
+6,camara,6,2026-09-02,2026-09-09,activo
+7,notebook,2,fecha_solicitud,fecha_devolucion,pendiente
+8,notebook,2,fecha_solicitud,fecha_devolucion,pendiente

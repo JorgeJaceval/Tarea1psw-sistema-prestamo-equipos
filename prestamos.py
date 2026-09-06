@@ -1,7 +1,7 @@
 # BD equipos.csv
 #id  | equipos | existencias totales | existencias disponibles
 # BD prestamos.csv
-#id | equipo_id | usuario |fecha_desde |fecha_hasta | estado 
+#id | equipo | id_usuario |fecha_desde |fecha_hasta | estado 
 import csv
 
 #Determina la cantidad de prestamos activos de un solo usuario.
@@ -17,18 +17,26 @@ def obtener_siguiente_id(nombre_archivo):
     return mayor_id + 1
 
 
-def prestamos_activos (user):
+def prestamos_activos (user_id):
     prestamos = []
     for row in leer_prestamos():
-        if len(row) >= 6 and row[2] == user and row[5] == 'activo':
+        if len(row) >= 6 and row[2] == str(user_id) and row[5] == 'activo':
             prestamos.append(row)
     return prestamos
 
 
-def prestamos_pendientes (user):
+def prestamos_pendientes (user_id):
     prestamos = []
     for row in leer_prestamos():
-        if len(row) >= 6 and row[2] == user and row[5] == 'pendiente':
+        if len(row) >= 6 and row[2] == str(user_id) and row[5] == 'pendiente':
+            prestamos.append(row)
+    return prestamos
+
+
+def prestamos_usuario (user_id):
+    prestamos = []
+    for row in leer_prestamos():
+        if len(row) >= 6 and row[2] == str(user_id):
             prestamos.append(row)
     return prestamos
 
@@ -55,8 +63,8 @@ def guardar_prestamos(prestamos):
         writer.writerows(prestamos)
 
 #Solicitud de prestamo de un equipo por parte de un usuario.
-def solicitar_prestamo (user, equipo):
-    solicitudes_pendientes = prestamos_pendientes(user)
+def solicitar_prestamo (user_id, equipo):
+    solicitudes_pendientes = prestamos_pendientes(user_id)
 
     if len(solicitudes_pendientes) >= 3:
         print("El máximo son 3 solicitudes pendientes. Espere a que un administrador revise sus solicitudes antes de enviar otra.")
@@ -74,7 +82,7 @@ def solicitar_prestamo (user, equipo):
 
     with open('bd_prestamos.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([obtener_siguiente_id('bd_prestamos.csv'), equipo[1], user, "fecha_solicitud", "fecha_devolucion", "pendiente"])
+        writer.writerow([obtener_siguiente_id('bd_prestamos.csv'), equipo[1], user_id, "fecha_solicitud", "fecha_devolucion", "pendiente"])
         print("Solicitud de préstamo enviada. Espere la aprobación del administrador.\n")
 
 
@@ -134,7 +142,7 @@ def administrar_prestamos():
         return
 
     for indice, prestamo in enumerate(prestamos_pendientes, start=1):
-        print(f"{indice}. ID: {prestamo[0]}, Equipo: {prestamo[1]}, Usuario: {prestamo[2]}, Estado: {prestamo[5]}")
+        print(f"{indice}. ID: {prestamo[0]}, Equipo: {prestamo[1]}, ID usuario: {prestamo[2]}, Estado: {prestamo[5]}")
 
     op = input("Ingrese el número del préstamo que desea aprobar o rechazar (o '0' para salir): ")
 
