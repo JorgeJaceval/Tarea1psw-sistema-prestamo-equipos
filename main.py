@@ -37,27 +37,28 @@ def menu_admin ():
 
         if op == 3:
             print("Registrando un nuevo equipo...")
-            #Lógica para registrar un nuevo equipo
+            prestamos.ingresar_equipo(input("Ingrese el nombre del equipo: "), input("Ingrese la cantidad de existencias: "))
             continue
 
         if op == 4:
             print("Consultando equipos existentes...")
-            #Lógica para consultar equipos existentes
+            prestamos.mostrar_equipos_disponibles()
             continue
 
         if op == 5:
             print("Aprobando / rechazando préstamos...")
-            #Lógica para aprobar / rechazar préstamos
+            prestamos.administrar_prestamos()
             continue
 
         if op == 6:
             print("Consultando préstamos existentes...")
-            #Lógica para consultar préstamos existentes
+            prestamos.prestamos_activos_total()
             continue
 
         if op == 7:
             print("Ingresando devoluciones...")
-            #Lógica para ingresar devoluciones
+            prestamos.devolver_prestamo(input("Ingrese el ID del préstamo a devolver: "))
+            
             continue
 
         if op == 0:

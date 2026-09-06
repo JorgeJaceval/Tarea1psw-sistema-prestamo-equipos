@@ -19,12 +19,31 @@ def obtener_siguiente_id(nombre_archivo):
 
 def prestamos_activos (user):
     prestamos = []
+    for row in leer_prestamos():
+        if len(row) >= 6 and row[2] == user and row[5] == 'activo':
+            prestamos.append(row)
+    return prestamos
+
+def prestamos_activos_total ():
+    prestamos = []
+    for row in leer_prestamos():
+        if len(row) >= 6 and row[5] == 'activo':
+            prestamos.append(row)
+    return prestamos
+
+def leer_prestamos():
+    prestamos = []
     with open('bd_prestamos.csv', 'r') as file:
         reader = csv.reader(file)
         for row in reader:
-            if len(row) >= 6 and row[2] == user and row[5] == 'activo':
-                prestamos.append(row)
+            prestamos.append(row)
     return prestamos
+
+
+def guardar_prestamos(prestamos):
+    with open('bd_prestamos.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(prestamos)
 
 #Solicitud de prestamo de un equipo por parte de un usuario.
 def solicitar_prestamo (user, equipo):
@@ -40,15 +59,17 @@ def solicitar_prestamo (user, equipo):
                     #Se realiza el prestamo
                     with open('bd_prestamos.csv', 'a', newline='') as file:
                         writer = csv.writer(file)
-                        writer.writerow([obtener_siguiente_id('bd_prestamos.csv'), equipo, user, "fecha_solicitud", "fecha_devolucion", "activo"])
+                        writer.writerow([obtener_siguiente_id('bd_prestamos.csv'), equipo, user, "fecha_solicitud", "fecha_devolucion", "pendiente"])
                         print("Solicitud de préstamo enviada. Espere la aprobación del administrador.")
                     
                 else:
                     print("No hay existencias disponibles. No se puede solicitar el préstamo.")
                     return
-                    
+
+
 
 def mostrar_equipos_disponibles():
+
     equipos_disponibles = []
     with open('bd_equipos.csv', 'r') as file:
         reader = csv.reader(file)
@@ -57,7 +78,18 @@ def mostrar_equipos_disponibles():
                 equipos_disponibles.append(row)
     return equipos_disponibles
 
+def actualizar_existencias(equipo, cambio):
+    equipos = []
+    with open('bd_equipos.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if len(row) >= 4 and row[1] == equipo:
+                row[3] = str(int(row[3]) + cambio)  # Actualizar existencias disponibles
+            equipos.append(row)
 
+    with open('bd_equipos.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(equipos)
 
 
 #---Funcionalidades de administrador.---
@@ -68,4 +100,77 @@ def ingresar_equipo(equipo, existencias):
         writer.writerow([obtener_siguiente_id('bd_equipos.csv'), equipo, existencias, existencias])
         print("Equipo ingresado exitosamente.")
 
-def 
+
+def administrar_prestamos():
+    prestamos = leer_prestamos()
+    prestamos_pendientes = []
+
+    for row in prestamos:
+        if len(row) >= 6 and row[5] == 'pendiente':
+            prestamos_pendientes.append(row)
+
+    if not prestamos_pendientes:
+        print("No hay préstamos pendientes.")
+        return
+
+    for indice, prestamo in enumerate(prestamos_pendientes, start=1):
+        print(f"{indice}. ID: {prestamo[0]}, Equipo: {prestamo[1]}, Usuario: {prestamo[2]}, Estado: {prestamo[5]}")
+
+    op = input("Ingrese el número del préstamo que desea aprobar o rechazar (o '0' para salir): ")
+
+    if not op.isdigit():
+        print("Opción no válida.")
+        return
+
+    seleccion = int(op)
+
+    if seleccion == 0:
+        return
+
+    if seleccion < 1 or seleccion > len(prestamos_pendientes):
+        print("Selección no válida.")
+        return
+
+    prestamo_seleccionado = prestamos_pendientes[seleccion - 1]
+    decision = input("Ingrese 'A' para aprobar o 'R' para rechazar el préstamo: ").strip().upper()
+
+    if decision == 'A':
+        # Aprobar el préstamo
+        prestamo_seleccionado[5] = 'activo'
+        # Actualizar existencias en bd_equipos.csv
+        actualizar_existencias(prestamo_seleccionado[1], -1)
+        print("Préstamo aprobado.")
+    
+    elif decision == 'R':
+        # Rechazar el préstamo
+        prestamo_seleccionado[5] = 'cancelado'
+        print("Préstamo cancelado.")
+    else:
+        print("Decisión no válida.")
+        return
+
+    # Guardar los cambios en bd_prestamos.csv
+    guardar_prestamos(prestamos)
+                       
+def devolver_prestamo(prestamo_id):
+    prestamos = leer_prestamos()
+    prestamo_encontrado = False
+
+    for row in prestamos:
+        if len(row) >= 6 and row[0] == prestamo_id:
+            if row[5] == 'activo':
+                row[5] = 'finalizado'
+                actualizar_existencias(row[1], 1)  # Incrementar existencias disponibles
+                prestamo_encontrado = True
+                print("Préstamo devuelto exitosamente.")
+                break
+            else:
+                print("El préstamo no está activo y no puede ser devuelto.")
+                return
+
+    if not prestamo_encontrado:
+        print("No se encontró un préstamo con el ID proporcionado.")
+        return
+
+    # Guardar los cambios en bd_prestamos.csv
+    guardar_prestamos(prestamos)
