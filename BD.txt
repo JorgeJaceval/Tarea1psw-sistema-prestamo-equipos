@@ -7,3 +7,8 @@ id  | equipos | existencias totales | existencias disponibles
 2 ) BD prestamos
 
 id | equipo_id | usuario |fecha_desde |fecha_hasta | estado 
+
+
+*Estado -> activo | finalizado
+
+Si un equipo está atrasado, cuenta como prestamo activo, se comprueba el atraso comparando fecha_desde fecha_hasta

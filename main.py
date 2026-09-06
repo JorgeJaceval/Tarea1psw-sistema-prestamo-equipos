@@ -32,7 +32,7 @@ def menu_admin ():
 
         if op == 2:
             print("Administrando usuarios existentes...")
-            #Lógica para administrar usuarios existentes
+            auth.administrar_usuarios()
             continue
 
         if op == 3:
@@ -72,17 +72,12 @@ def menu_admin ():
 
 def menu_autenticacion ():
     while True:
-        print ("1. Registrar")
-        print ("2. Iniciar sesión")
-        print ("3. Salir")
+        print ("1. Iniciar sesión")
+        print ("2. Salir")
 
         option = input("Ingrese el número de la opción que desea seleccionar: ")
 
         if option == "1":
-            auth.register()
-            continue
-
-        elif option == "2":
             print("Iniciando sesion...")
             usuario = input("Ingrese su nombre de usuario: ").strip()
             password = input("Ingrese su contraseña: ").strip()
@@ -92,7 +87,7 @@ def menu_autenticacion ():
             else:
                 return usuario
         
-        elif option == "3":
+        elif option == "2":
             print("Saliendo del sistema...")
             exit()
         else:
@@ -104,10 +99,20 @@ def menu_usuario (user):
     #Funcionalidades: Consultar equipos, solicitar préstamos y consultar préstamos.
     #Comprobar antes si tiene prestamos atrasados
 
-    print ("Comprobando si tiene préstamos atrasados...")
+    print ("Comprobando si puede solicitar nuevos préstamos...")
     #Ir a la base de datos y comprobar si tiene prestamos atrasados
     #Si tiene prestamos atrasados, no puede solicitar nuevos prestamos.
-    prestamos.prestamos_activos(user)
+    prestamos_activos = prestamos.prestamos_activos(user)
+
+    if len(prestamos_activos) >= 3:
+        print("El máximo son 3 prestamos activos. No puede solicitar nuevos préstamos hasta que devuelva una.")
+        return
+
+    if len(prestamos_activos) < 3:
+        print("No tiene préstamos activos / no ha superado el máximo, puede solicitar nuevos préstamos.")
+    
+
+    
 
     op = -1
     while op != 0:
@@ -123,16 +128,23 @@ def menu_usuario (user):
         if op == 1:
             print("Consultando equipos disponibles...")
             #Ir a la base de datos y consultar los equipos disponibles
+            equipos = prestamos.mostrar_equipos_disponibles()
+            for equipo in equipos:
+                print(f" - {equipo[1]} (Disponibles: {equipo[3]})")
+            
             continue
 
         if op == 2:
             print("Solicitando un préstamo...")
-            #Lógica para solicitar un préstamo
+            equipo = input("Ingrese el nombre del equipo que desea solicitar: ")
+            prestamos.solicitar_prestamo(user, equipo)
             continue
 
         if op == 3:
             print("Consultando mis préstamos existentes...")
-            #Ir a la base de datos y consultar los préstamos del usuario
+            print ("Sus prestamos activos son: \n")
+            print (prestamos_activos)
+
             continue
 
         if op == 0:
@@ -147,6 +159,7 @@ def menu_usuario (user):
 def main ():
     #Funcionalidad principal del sistema.
     print("Bienvenido al sistema de préstamos de equipos.")
+    
     usuario = menu_autenticacion()
     rol = auth.autenticacion_simple[usuario]["rol"]
 
