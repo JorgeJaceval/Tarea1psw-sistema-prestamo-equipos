@@ -1,7 +1,4 @@
-autenticacion_simpĺe = {
-    "admin" : "password",
-    "jorge" : "aceval",
-    "joaquin" : "viveros"
+autenticacion_simple = {
 }
 
 
@@ -14,7 +11,7 @@ def register ():
         print("Error: Nombre de usuario y contraseña no pueden estar vacíos.")
         return
 
-    if user in autenticacion_simpĺe:
+    if user in autenticacion_simple:
         print("Error: El nombre de usuario ya existe.")
         return
 
@@ -24,7 +21,7 @@ def register ():
         print("Error: Nombre de usuario y contraseña no pueden estar vacíos.")
         return
     
-    autenticacion_simpĺe[user] = password
+    autenticacion_simple[user] = password
     print("Registro exitoso. Ahora puede iniciar sesión.")
 
     
