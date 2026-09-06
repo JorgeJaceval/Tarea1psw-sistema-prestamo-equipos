@@ -124,6 +124,7 @@ def menu_usuario (user_id):
             equipos = prestamos.mostrar_equipos_disponibles()
             for equipo in equipos:
                 print(f" - {equipo[1]} (Disponibles: {equipo[3]})")
+            print ("")
             
             continue
 
@@ -137,10 +138,10 @@ def menu_usuario (user_id):
             prestamos_pendientes = prestamos.prestamos_pendientes(user_id)
 
             if len(prestamos_activos) == 0:
-                print("No tiene préstamos activos, puede solicitar nuevos préstamos. \n")
+                print("No tiene préstamos activos. \n")
                 
             elif len(prestamos_activos) >= 3:
-                print("El máximo son 3 prestamos activos. No puede solicitar nuevos préstamos hasta que devuelva uno. \n")
+                print("El máximo son 3 prestamos. No puede solicitar nuevos préstamos hasta que devuelva uno. \n")
                 continue
 
             elif len(prestamos_activos) < 3:
@@ -185,6 +186,7 @@ def menu_usuario (user_id):
                 print("No tiene préstamos ni solicitudes registradas.")
             else:
                 print("Tiene préstamos / solicitudes registradas:")
+                print("")
                 for prestamo in prestamos_usuario:
                     print(f"ID: {prestamo[0]} | Equipo: {prestamo[1]} | Estado: {prestamo[5]}")
                 print ("")
