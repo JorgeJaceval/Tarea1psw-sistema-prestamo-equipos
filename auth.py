@@ -3,39 +3,46 @@ from getpass import getpass
 "admin" : {
     "id" : 1,
     "password" : "hash",
-    "rol" : "admin"
+    "rol" : "admin",
+    "multa" : 0
 }
 '''
 autenticacion_simple = {
     "admin": {
         "id" : 1,
         "password": "admin123",
-        "rol": "admin"
+        "rol": "admin",
+        "multa": 0
     },
     "joaco": {
         "id" : 2,
         "password": "joaco123",
-        "rol": "user"
+        "rol": "user",
+        "multa": 0
     },
     "juan": {
         "id" : 3,
         "password": "juan123",
-        "rol": "user"
+        "rol": "user",
+        "multa": 0
     },
     "maria": {
         "id" : 4,
         "password": "maria123",
-        "rol": "user"
+        "rol": "user",
+        "multa": 0
     },
     "pedro": {
         "id" : 5,
         "password": "pedro123",
-        "rol": "user"
+        "rol": "user",
+        "multa": 0
     },
     "ana": {
         "id" : 6,
         "password": "ana123",
-        "rol": "user"
+        "rol": "user",
+        "multa": 0
     }
 
 }
@@ -75,7 +82,8 @@ def register ():
         autenticacion_simple[user] = {
             "id": obtener_siguiente_id_usuario(),
             "password": password,
-            "rol": "user"
+            "rol": "user",
+            "multa": 0
         }
 
         print("Registro exitoso. Ahora puede iniciar sesión.")
@@ -95,6 +103,22 @@ def login (user, password):
     
 
     
+def obtener_usuario_por_id(user_id):
+    for user, datos in autenticacion_simple.items():
+        if datos["id"] == int(user_id):
+            return user
+    return None
+
+
+def aplicar_multa(user_id, multa):
+    user = obtener_usuario_por_id(user_id)
+
+    if user is None:
+        return False
+
+    autenticacion_simple[user]["multa"] = multa
+    return True
+
 
 def administrar_usuarios():
     if not autenticacion_simple:
@@ -106,7 +130,8 @@ def administrar_usuarios():
     for indice, user in enumerate(usuarios, start=1):
         user_id = autenticacion_simple[user]["id"]
         rol = autenticacion_simple[user]["rol"]
-        print(f"{indice}. {user} - ID: {user_id} - Rol: {rol}")
+        multa = autenticacion_simple[user]["multa"]
+        print(f"{indice}. {user} - ID: {user_id} - Rol: {rol} - Multa: {multa}")
 
     op = input("Ingrese el número del usuario que desea eliminar o actualizar (o '0' para salir): ")
 

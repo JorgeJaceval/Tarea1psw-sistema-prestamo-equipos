@@ -130,6 +130,9 @@ def menu_usuario (user_id):
 
         if op == 2:
             #Comprobar antes si tiene prestamos atrasados
+            if auth.autenticacion_simple[auth.obtener_usuario_por_id(user_id)]["multa"] > 0:
+                print("No puede solicitar nuevos préstamos debido a que tiene una multa pendiente. \n")
+                continue
 
             print ("Comprobando si puede solicitar nuevos préstamos...\n")
             #Ir a la base de datos y comprobar si tiene prestamos atrasados

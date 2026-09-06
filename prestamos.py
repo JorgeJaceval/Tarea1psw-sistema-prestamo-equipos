@@ -3,7 +3,8 @@
 # BD prestamos.csv
 #id | equipo | id_usuario |fecha_desde |fecha_hasta | estado 
 import csv
-
+from datetime import date, datetime, timedelta
+import auth
 #Determina la cantidad de prestamos activos de un solo usuario.
 
 #--Funcionalidades de usuario.---
@@ -80,9 +81,12 @@ def solicitar_prestamo (user_id, equipo):
 
     print("Hay existencias disponibles. Se puede solicitar el préstamo.")
 
+    fecha_desde = date.today()
+    fecha_hasta = fecha_desde + timedelta(days=14)
+
     with open('bd_prestamos.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([obtener_siguiente_id('bd_prestamos.csv'), equipo[1], user_id, "fecha_solicitud", "fecha_devolucion", "pendiente"])
+        writer.writerow([obtener_siguiente_id('bd_prestamos.csv'), equipo[1], user_id, fecha_desde, fecha_hasta, "pendiente"])
         print("Solicitud de préstamo enviada. Espere la aprobación del administrador.\n")
 
 
@@ -194,10 +198,25 @@ def devolver_prestamo(prestamo_id):
     for row in prestamos:
         if len(row) >= 6 and row[0] == prestamo_id:
             if row[5] == 'activo':
+                try:
+                    fecha_hasta = datetime.strptime(row[4], "%Y-%m-%d").date()
+                except ValueError:
+                    print("La fecha de devolución del préstamo no tiene un formato válido.")
+                    return
+
+                dias_atraso = (date.today() - fecha_hasta).days
+                multa = 1 if dias_atraso > 14 else 0
+
+                if not auth.aplicar_multa(row[2], multa):
+                    print("No se encontró el usuario asociado al préstamo.")
+                    return
+
                 row[5] = 'finalizado'
                 actualizar_existencias(row[1], 1)  # Incrementar existencias disponibles
                 prestamo_encontrado = True
                 print("Préstamo devuelto exitosamente.")
+                if multa == 1:
+                    print("El usuario tiene una multa por atraso mayor a dos semanas.")
                 break
             else:
                 print("El préstamo no está activo y no puede ser devuelto.")
