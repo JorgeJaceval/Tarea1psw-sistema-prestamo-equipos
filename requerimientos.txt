@@ -1,0 +1,14 @@
+#Se usará un modelo de desarrollo Spec-Drive con enfoque modular, por lo que es esencial el describir correctamente
+los requerimientos antes de comenzar.
+
+Requerimientos base:
+
+Registrar personas autorizadas.
+Registrar y consultar equipos.
+Solicitar la reserva o préstamo de uno o más equipos.
+Aprobar o rechazar solicitudes.
+Registrar entregas, devoluciones y cancelaciones.
+Consultar préstamos vigentes, futuros y atrasados.
+Proteger el acceso mediante inicio de sesión.
+
+

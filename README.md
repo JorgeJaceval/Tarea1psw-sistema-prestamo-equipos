@@ -14,7 +14,7 @@ Algunas de las ambiguedadd presentes en este sistema podrían ser:
 * Un riesgo posible es que una persona debe tener un límite en la cantidad de equipos posibles a pedir, ya que no puede reservar todo en un eventual caso
 * Un riesgo posible es que la transición entre estados no sea correcta, lo cual provoque que hayan estados incorrectos que impidan reserver un equipo.
 * Simple y confiable son criterios demasiados subjetivos, y no existe una forma de determinar cuándo el sistema cumple con ellos.
-* No se menciona un sistema de credenciales, pero no cómo debe estar implementado, ni politicas de contraseñás
+* Se menciona un sistema de autenticación, pero no cómo debe estar implementado, ni politicas de contraseñás
 * Aprobación de solicitudes: no se establecen criterios para aprobar o rechazar una solicitud.
 
 Formular preguntas que realizaría al cliente en base a las ambiguedades, riesgos,  vacios o conflicos
