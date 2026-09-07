@@ -2,6 +2,7 @@
 import auth
 import prestamos
 from datetime import date
+from getpass import getpass
 import logging
 from monitoreo import configurar_monitoreo
 
@@ -104,7 +105,7 @@ def menu_autenticacion ():
         if option == "1":
             print("\nIniciando sesion...\n")
             usuario = input("Ingrese su nombre de usuario: ").strip()
-            password = input("Ingrese su contraseña: ").strip()
+            password = getpass("Ingrese su contraseña: ")
 
             if not auth.login(usuario, password):
                 continue
@@ -243,6 +244,7 @@ def main ():
     print("****************************************************")
     print("*  Bienvenido al sistema de préstamos de equipos.  *")
     print("****************************************************\n")
+    auth.inicializar_autenticacion()
     
     usuario = menu_autenticacion()
     usuario_autenticado = auth.autenticacion_simple[usuario]

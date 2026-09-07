@@ -4,3 +4,7 @@ __pycache__/
 .env
 logs/
 .codex-test-deps/
+bd_usuarios.csv
+.gitignore
+
+

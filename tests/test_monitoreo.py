@@ -4,6 +4,7 @@ import io
 import json
 import logging
 from pathlib import Path
+import secrets
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
@@ -24,6 +25,19 @@ class MonitoreoTests(unittest.TestCase):
         self.parches = contextlib.ExitStack()
         self.parches.enter_context(patch.object(monitoreo, "LOG_DIR", self.directorio))
         self.parches.enter_context(patch.dict("os.environ", {"SENTRY_DSN": ""}))
+        self.parches.enter_context(patch.dict(auth.autenticacion_simple, {}, clear=True))
+
+    def crear_usuario_prueba(self, user="admin", rol="admin"):
+        password = secrets.token_urlsafe(16)
+        salt, password_hash = auth.crear_hash_password(password)
+        auth.autenticacion_simple[user] = {
+            "id": 1,
+            "salt": salt,
+            "password_hash": password_hash,
+            "rol": rol,
+            "multa": 0
+        }
+        return password
 
     def tearDown(self):
         for handler in self.raiz.handlers:
@@ -59,13 +73,15 @@ class MonitoreoTests(unittest.TestCase):
 
     def test_login_no_registra_credenciales(self):
         monitoreo.configurar_monitoreo()
+        password = self.crear_usuario_prueba()
+        clave_invalida = secrets.token_urlsafe(16)
         with contextlib.redirect_stdout(io.StringIO()):
-            auth.login("admin", "admin123")
-            auth.login("usuario-inexistente", "clave-de-prueba")
+            auth.login("admin", password)
+            auth.login("usuario-inexistente", clave_invalida)
         texto = self.leer_log()
         self.assertIn("usuario_id=1", texto)
         self.assertIn("WARNING", texto)
-        for dato in ("admin123", "usuario-inexistente", "clave-de-prueba"):
+        for dato in (password, "usuario-inexistente", clave_invalida):
             self.assertNotIn(dato, texto)
 
     def test_salida_normal_no_es_error_y_envia_pendientes(self):
@@ -93,14 +109,17 @@ class MonitoreoTests(unittest.TestCase):
         import sentry_sdk
         eventos = []
         init_real = sentry_sdk.init
+        datos_sensibles = []
 
         def iniciar(**opciones):
             # Este transporte mantiene los eventos en memoria y nunca usa la red.
             return init_real(**opciones, transport=lambda evento: eventos.append(evento))
 
         def fallo():
-            password = "secreto-local-de-prueba"
-            auth.login("admin", "admin123")
+            password = self.crear_usuario_prueba()
+            secreto_local = secrets.token_urlsafe(16)
+            datos_sensibles.extend([password, secreto_local])
+            auth.login("admin", password)
             logging.warning("Contexto de prueba")
             raise RuntimeError("Fallo controlado para verificar Sentry")
 
@@ -114,8 +133,8 @@ class MonitoreoTests(unittest.TestCase):
             self.assertEqual(evento["level"], "error")
             self.assertTrue(any(miga.get("message") == "Contexto de prueba" for miga in evento["breadcrumbs"]["values"]))
             texto = json.dumps(evento)
-            self.assertNotIn("admin123", texto)
-            self.assertNotIn("secreto-local-de-prueba", texto)
+            for dato in datos_sensibles:
+                self.assertNotIn(dato, texto)
             for excepcion in evento["exception"]["values"]:
                 for frame in excepcion["stacktrace"]["frames"]:
                     self.assertFalse(frame.get("vars"))
