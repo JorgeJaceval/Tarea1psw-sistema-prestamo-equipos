@@ -1,0 +1,14 @@
+Estructura de la BD's:
+
+1) BD productos
+id  | equipos | existencias totales | existencias disponibles
+
+
+2 ) BD prestamos
+
+id | equipo | id_usuario |fecha_desde |fecha_hasta | estado 
+
+
+*Estado -> activo | finalizado
+
+Si un equipo está atrasado, cuenta como prestamo activo, se comprueba el atraso comparando fecha_desde fecha_hasta
