@@ -44,7 +44,15 @@ def menu_admin ():
 
         if op == 4:
             print("Consultando equipos existentes...")
-            prestamos.mostrar_equipos_disponibles()
+            equipos = prestamos.mostrar_equipos_disponibles()
+
+            if not equipos:
+                print("No hay equipos disponibles.")
+                continue
+
+            for equipo in equipos:
+                print(f" - {equipo[1]} (Disponibles: {equipo[3]})")
+            print("")
             continue
 
         if op == 5:
@@ -109,7 +117,7 @@ def menu_usuario (user_id):
     op = -1
     while op != 0:
         op = -1
-        print("Opciones disponibles")
+        print("Opciones disponibles Usuario")
         print("1. Consultar equipos disponibles")
         print("2. Solicitar un préstamo")
         print("3. Consultar mis préstamos existentes / solicitudes")
@@ -122,6 +130,11 @@ def menu_usuario (user_id):
             print("Consultando equipos disponibles...")
             #Ir a la base de datos y consultar los equipos disponibles
             equipos = prestamos.mostrar_equipos_disponibles()
+
+            if not equipos:
+                print("No hay equipos disponibles.")
+                continue
+
             for equipo in equipos:
                 print(f" - {equipo[1]} (Disponibles: {equipo[3]})")
             print ("")
@@ -131,7 +144,7 @@ def menu_usuario (user_id):
         if op == 2:
             #Comprobar antes si tiene prestamos atrasados
             if auth.autenticacion_simple[auth.obtener_usuario_por_id(user_id)]["multa"] > 0:
-                print("No puede solicitar nuevos préstamos debido a que tiene una multa pendiente. \n")
+                print("No puede solicitar nuevos préstamos debido a que tiene una multa impuesta. \n")
                 continue
 
             print ("Comprobando si puede solicitar nuevos préstamos...\n")

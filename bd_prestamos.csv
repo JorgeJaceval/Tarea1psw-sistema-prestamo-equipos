@@ -6,3 +6,6 @@
 6,camara,6,2026-09-02,2026-09-09,activo
 7,notebook,2,fecha_solicitud,fecha_devolucion,pendiente
 8,notebook,2,fecha_solicitud,fecha_devolucion,pendiente
+9,camara,2,2026-09-06,2026-09-20,finalizado
+10,tablet,2,2026-09-06,2026-09-20,cancelado
+11,camara,2,2026-09-06,2026-09-20,pendiente

@@ -18,7 +18,7 @@ autenticacion_simple = {
         "id" : 2,
         "password": "joaco123",
         "rol": "user",
-        "multa": 0
+        "multa": 1
     },
     "juan": {
         "id" : 3,
