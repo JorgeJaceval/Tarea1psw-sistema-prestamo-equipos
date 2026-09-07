@@ -66,9 +66,10 @@ def guardar_prestamos(prestamos):
 #Solicitud de prestamo de un equipo por parte de un usuario.
 def solicitar_prestamo (user_id, equipo):
     solicitudes_pendientes = prestamos_pendientes(user_id)
+    solicitudes_existentes = prestamos_usuario(user_id)
 
-    if len(solicitudes_pendientes) >= 3:
-        print("El máximo son 3 solicitudes pendientes. Espere a que un administrador revise sus solicitudes antes de enviar otra.")
+    if len(solicitudes_pendientes + solicitudes_existentes) >= 3:
+        print("El máximo son 3 solicitudes pendientes y/o activas. Espere a que un administrador revise sus solicitudes antes de enviar otra.")
         return
 
     if len(equipo) < 4:

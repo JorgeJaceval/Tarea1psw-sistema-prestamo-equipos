@@ -153,15 +153,15 @@ def menu_usuario (user_id):
             prestamos_activos = prestamos.prestamos_activos(user_id)
             prestamos_pendientes = prestamos.prestamos_pendientes(user_id)
 
-            if len(prestamos_activos) == 0:
-                print("No tiene préstamos activos. \n")
+            if len(prestamos_activos + prestamos_pendientes) == 0:
+                print("No tiene préstamos activos y/o pendientes. \n")
                 
-            elif len(prestamos_activos) >= 3:
-                print("El máximo son 3 prestamos. No puede solicitar nuevos préstamos hasta que devuelva uno. \n")
+            elif len(prestamos_activos + prestamos_pendientes) >= 3:
+                print("El máximo son 3 prestamos. No puede solicitar nuevos préstamos hasta que devuelva / rechacen uno. \n")
                 continue
 
-            elif len(prestamos_activos) < 3:
-                print(f"No ha superado el máximo de prestamos ({len(prestamos_activos)}|3), puede solicitar hasta {3 - len(prestamos_activos)} préstamo(s). \n")
+            elif len(prestamos_activos+prestamos_pendientes) < 3:
+                print(f"No ha superado el máximo de prestamos ({len(prestamos_activos) + len(prestamos_pendientes)}|3), puede solicitar hasta {3 - len(prestamos_activos)} préstamo(s) / solicitudes de prestamos. \n")
 
             if len(prestamos_pendientes) >= 3:
                 print("Tiene 3 solicitudes pendientes. No puede enviar más solicitudes hasta que un administrador revise alguna. \n")
