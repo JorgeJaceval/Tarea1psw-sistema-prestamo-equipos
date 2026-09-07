@@ -1,3 +1,0 @@
-#Se usará un modelo de desarrollo Spec-Drive (Spec first) con enfoque modular, por lo que es esencial el describir correctamente
-los requerimientos antes de comenzar, guiados por los elementos del readme.
-

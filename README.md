@@ -1,121 +1,71 @@
 Jorge Aceval 202273513-9
-Joaquin Viveros 2022735
+Joaquin Viveros 202273586-4
 
+## Cómo ejecutar el programa
 
-# Sistema de gestión de equipos 
+Necesitas Python 3.7 o superior. Abre una terminal en la carpeta donde está `main.py`, instala las dependencias y ejecuta:
 
-## Análisis de requerimientos
-Identificar al menos 8 ambigüedades, vacíos, riesgos o conflictos.
-Algunas de las ambiguedadd presentes en este sistema podrían ser:
+```bash
+python -m pip install -r requirements.txt
+python main.py
+```
 
-* Sistema de multas: No se especifica qué pasa en caso de qué alguien no entregue lo pedido en el tiempo establecido.
-* Información del usuario que se debe almacernar en el sistrma
-* Información de los equipos que se debe almacenar en el sistema
-* Un riesgo posible es que una persona debe tener un límite en la cantidad de equipos posibles a pedir, ya que no puede reservar todo en un eventual caso
-* Un riesgo posible es que la transición entre estados no sea correcta, lo cual provoque que hayan estados incorrectos que impidan reserver un equipo.
-* Simple y confiable son criterios demasiados subjetivos, y no existe una forma de determinar cuándo el sistema cumple con ellos.
-* Se menciona un sistema de autenticación, pero no cómo debe estar implementado, ni politicas de contraseñás
-* Aprobación de solicitudes: no se establecen criterios para aprobar o rechazar una solicitud.
+Si tu instalación usa `python3` o `py`, reemplaza `python` en los comandos. Ejecuta siempre desde la carpeta del proyecto, porque ahí se buscan `bd_equipos.csv` y `bd_prestamos.csv`.
 
-Formular preguntas que realizaría al cliente en base a las ambiguedades, riesgos,  vacios o conflicos
-1. ¿Qué debe ocurrir cuando un usuario devuelve un equipo después de la fecha establecida? ¿Se aplicarán multas, restricciones o algún otro tipo de sanción?
+## Para probarlo
 
-2. ¿Qué información de cada usuario debe almacenarse obligatoriamente en el sistema?
+Al iniciar, escribe `1` para entrar. Puedes usar estas cuentas:
 
-3. ¿Qué información debe registrarse para cada equipo y qué dato permitirá identificarlo de manera única?
+| Rol | Usuario | Contraseña |
+| --- | --- | --- |
+| Administrador | `admin` | `admin123` |
+| Usuario | `juan` | `juan123` |
 
-4. ¿Cuál es la cantidad máxima de equipos que una persona puede reservar o mantener prestados simultáneamente?
+El administrador gestiona usuarios, equipos y préstamos. La opción `6` muestra los préstamos activos.
 
-5. ¿Cuáles son los estados posibles de una solicitud o préstamo y qué transiciones están permitidas entre ellos?
+El usuario puede consultar equipos, pedir préstamos y revisar sus solicitudes. Las multas y los préstamos vencidos bloquean las nuevas solicitudes.
 
-6. ¿Qué criterios concretos permitirán considerar que el sistema es “simple” y “confiable”?
+Para salir, escribe `0` en el menú de tu cuenta o `2` en la pantalla inicial. Para cambiar de cuenta, vuelve a ejecutar el programa.
 
-7. ¿Cómo deben administrarse las credenciales de los usuarios? ¿Existen requisitos mínimos o políticas para las contraseñas?
+Los cambios de equipos y préstamos quedan guardados en los CSV. Los usuarios nuevos, los cambios de rol y las multas se mantienen solo mientras el programa está abierto; al reiniciarlo se cargan otra vez los valores de `auth.py`.
 
-8. ¿Qué condiciones debe cumplir una solicitud para ser aprobada y en qué situaciones debe ser rechazada?
+## Dónde está cada cosa
 
-Proponer un requerimiento mejorado.
+- `main.py`: menús y ejecución del programa.
+- `auth.py`: usuarios, inicio de sesión, roles y multas.
+- `prestamos.py`: equipos, solicitudes, devoluciones y lectura de los CSV.
+- `monitoreo.py`: configuración de logs y Sentry.
 
-* El sistema deberá permitir el inicio de sesión mediante correo institucional y contraseña. Solo los usuarios registrados y habilitados podrán acceder. Tras autenticarse, el sistema deberá restringir las funcionalidades disponibles según el rol del usuario: solicitante o encargado.
+## Logs
 
-## Definir reglas de negocio, alcance y exclusiones.
+Los registros quedan en `logs/sistema.log`, con fecha, nivel y módulo. `INFO` indica una operación normal, `WARNING` una advertencia y `ERROR` un fallo con su detalle. El archivo rota al llegar a aproximadamente 1 MB y guarda hasta tres copias. Los logs no se suben a Git y los registros de operaciones no incluyen contraseñas.
 
-### Reglas de negocio
+Para verlos mientras pruebas, abre otra terminal de PowerShell en la carpeta del proyecto:
 
-* **RN-01:** Solo los usuarios registrados y habilitados podrán solicitar préstamos o reservas.
-* **RN-02:** Un usuario podrá mantener un máximo de 3 equipos reservados o prestados simultáneamente.
-* **RN-03:** Un equipo solo podrá ser reservado si se encuentra disponible durante todo el período solicitado.
-* **RN-04:** Dos solicitudes aprobadas no podrán reservar el mismo equipo en períodos de tiempo que se superpongan.
-* **RN-05:** Toda solicitud deberá ser aprobada o rechazada por un encargado antes de realizar la entrega.
-* **RN-06:** Solo un encargado podrá registrar la entrega y devolución de un equipo.
-* **RN-07:** Un préstamo será considerado atrasado cuando haya superado su fecha de devolución sin que esta haya sido registrada.
-* **RN-08:** Un usuario que mantenga un préstamo atrasado no podrá realizar nuevas solicitudes hasta devolver los equipos pendientes.
-* **RN-09:** Las operaciones sobre un préstamo solo podrán realizar transiciones de estado previamente definidas.
-* **RN-10:** Las funcionalidades disponibles estarán restringidas según el rol del usuario autenticado.
+```powershell
+Get-Content .\logs\sistema.log -Wait -Tail 20
+```
 
-### Alcance
+## Conectar Sentry
 
-El sistema permitirá:
+La configuración está en [`monitoreo.py`](monitoreo.py), dentro de `configurar_monitoreo()`. Ahí se leen `SENTRY_DSN` y `SENTRY_ENVIRONMENT`, y se llama a `sentry_sdk.init()`. Si necesitas cambiar las opciones de la integración, ese es el lugar.
 
-* Registrar y administrar usuarios autorizados.
-* Registrar y consultar equipos.
-* Autenticar usuarios.
-* Crear solicitudes de reserva o préstamo.
-* Aprobar y rechazar solicitudes.
-* Registrar entregas, devoluciones y cancelaciones.
-* Consultar préstamos vigentes, futuros y atrasados.
-* Determinar la disponibilidad de los equipos.
-* Registrar eventos relevantes mediante logs.
-* Manejar entradas inválidas y errores durante las operaciones.
+Para conectarlo a tu cuenta, crea un proyecto de Python en [Sentry](https://sentry.io/) y copia su DSN, la dirección que identifica el proyecto. **Reemplaza `TU_DSN` en el siguiente comando de PowerShell** y ejecuta todo en la misma terminal:
 
-### Exclusiones
+```powershell
+$env:SENTRY_DSN = "TU_DSN"
+$env:SENTRY_ENVIRONMENT = "desarrollo"
+python main.py
+```
 
-El sistema no contemplará:
+El DSN se configura en la terminal; no es necesario escribirlo en el archivo Python. Estas variables duran hasta cerrar la terminal. `SENTRY_ENVIRONMENT` es opcional y usa `desarrollo` por defecto. En Linux o macOS puedes definirlas con `export SENTRY_DSN="TU_DSN"` y `export SENTRY_ENVIRONMENT="desarrollo"`.
 
-* Cobro o procesamiento de multas monetarias.
-* Pagos en línea.
-* Envío automático de correos electrónicos o mensajes de WhatsApp.
-* Integración con sistemas externos de la universidad.
-* Recuperación automática de contraseñas.
-* Aplicación web o interfaz gráfica.
-* Gestión de reparación o mantenimiento de equipos.
-* Gestión de inventario distinta de los equipos destinados a préstamos.
+Sentry recibe los errores y el contexto de los logs, sin capturar variables locales ni fragmentos del código. Sin DSN, solo se generan logs locales. Revisa `logs/sistema.log`: debe aparecer `Sentry activado` cuando la configuración se haya cargado. Eso confirma el inicio del SDK; la recepción de errores se comprueba en tu proyecto de Sentry.
 
-Establecer criterios de aceptación verificables.
+## Pruebas
 
-## Criterios de aceptación
+```bash
+python -m unittest discover -s tests -v
+```
 
-* **CA-01: Inicio de sesión:** Dado un usuario registrado y habilitado, cuando ingrese credenciales correctas, el sistema deberá permitirle iniciar sesión y acceder únicamente a las funcionalidades correspondientes a su rol.
-
-* **CA-02: Credenciales incorrectas:** Cuando un usuario ingrese credenciales incorrectas, el sistema deberá rechazar el inicio de sesión y no permitir acceso a las funcionalidades del sistema.
-
-* **CA-03: Límite de equipos:** Si un usuario ya posee 3 equipos reservados o prestados, el sistema deberá rechazar cualquier nueva solicitud que supere dicho límite.
-
-* **CA-04: Disponibilidad:** El sistema deberá rechazar una solicitud cuando alguno de los equipos solicitados ya se encuentre reservado o prestado durante un período que se superponga con el solicitado.
-
-* **CA-05: Aprobación:** Una solicitud pendiente solo podrá ser aprobada o rechazada por un usuario con rol de encargado.
-
-* **CA-06: Entrega:** El sistema solo deberá permitir registrar la entrega de una solicitud previamente aprobada.
-
-* **CA-07: Devolución:** El sistema solo deberá permitir registrar la devolución de un préstamo que haya sido previamente entregado.
-
-* **CA-08: Préstamo atrasado:** Si la fecha de devolución establecida ha sido superada y el equipo no ha sido devuelto, el sistema deberá identificar el préstamo como atrasado.
-
-* **CA-09: Usuario con atraso:** Si un usuario posee al menos un préstamo atrasado, el sistema deberá rechazar una nueva solicitud de préstamo o reserva.
-
-* **CA-10: Transiciones:** El sistema deberá rechazar cualquier intento de realizar una transición de estado que no esté definida como válida.
-
-* **CA-11: Persistencia:** Después de cerrar y volver a ejecutar la aplicación, los usuarios, equipos y préstamos registrados deberán conservarse.
-
-* **CA-12: Entradas inválidas:** Ante una entrada inválida, el sistema deberá rechazar la operación sin modificar los datos existentes ni finalizar inesperadamente.
-
-2.3 Verificación y validación
-Explicar, aplicado al proyecto, la diferencia entre:
-
-Verificación: ¿Estamos construyendo correctamente el producto especificado?
-Validación: ¿Estamos construyendo el producto que realmente se necesita?
-Definir y ejecutar al menos:
-
-5 actividades de verificación.
-5 actividades de validación.
-Para cada actividad indicar su objetivo, responsable, evidencia, resultado y conclusión. Como se vió en clases "No se aceptarán definiciones únicamente teóricas".
+Las pruebas usan eventos en memoria y no envían datos a Sentry. Si falta el SDK, se omiten las dos pruebas que lo necesitan.

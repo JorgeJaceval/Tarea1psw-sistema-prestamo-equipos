@@ -3,8 +3,11 @@
 # BD prestamos.csv
 #id | equipo | id_usuario |fecha_desde |fecha_hasta | estado 
 import csv
+import logging
 from datetime import date, datetime, timedelta
 import auth
+
+logger = logging.getLogger(__name__)
 #Determina la cantidad de prestamos activos de un solo usuario.
 
 #--Funcionalidades de usuario.---
@@ -66,17 +69,20 @@ def guardar_prestamos(prestamos):
 #Solicitud de prestamo de un equipo por parte de un usuario.
 def solicitar_prestamo (user_id, equipo):
     solicitudes_pendientes = prestamos_pendientes(user_id)
-    solicitudes_existentes = prestamos_usuario(user_id)
+    solicitudes_existentes = prestamos_activos(user_id)
 
     if len(solicitudes_pendientes + solicitudes_existentes) >= 3:
+        logger.warning("Solicitud bloqueada por limite de prestamos: usuario_id=%s", user_id)
         print("El máximo son 3 solicitudes pendientes y/o activas. Espere a que un administrador revise sus solicitudes antes de enviar otra.")
         return
 
     if len(equipo) < 4:
+        logger.warning("Solicitud bloqueada por equipo invalido: usuario_id=%s", user_id)
         print("Equipo no válido.")
         return
 
     if int(equipo[3]) <= 0:
+        logger.warning("Solicitud bloqueada por falta de existencias: usuario_id=%s equipo_id=%s", user_id, equipo[0])
         print("No hay existencias disponibles. No se puede solicitar el préstamo.")
         return
 
@@ -87,8 +93,10 @@ def solicitar_prestamo (user_id, equipo):
 
     with open('bd_prestamos.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([obtener_siguiente_id('bd_prestamos.csv'), equipo[1], user_id, fecha_desde, fecha_hasta, "pendiente"])
+        prestamo_id = obtener_siguiente_id('bd_prestamos.csv')
+        writer.writerow([prestamo_id, equipo[1], user_id, fecha_desde, fecha_hasta, "pendiente"])
         print("Solicitud de préstamo enviada. Espere la aprobación del administrador.\n")
+    logger.info("Solicitud creada: prestamo_id=%s usuario_id=%s equipo_id=%s", prestamo_id, user_id, equipo[0])
 
 
 
@@ -130,8 +138,10 @@ def obtener_existencias_disponibles(equipo):
 def ingresar_equipo(equipo, existencias):
     with open('bd_equipos.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([obtener_siguiente_id('bd_equipos.csv'), equipo, existencias, existencias])
+        equipo_id = obtener_siguiente_id('bd_equipos.csv')
+        writer.writerow([equipo_id, equipo, existencias, existencias])
         print("Equipo ingresado exitosamente.")
+    logger.info("Equipo ingresado: equipo_id=%s existencias=%s", equipo_id, existencias)
 
 
 def administrar_prestamos():
@@ -171,6 +181,7 @@ def administrar_prestamos():
         existencias_disponibles = obtener_existencias_disponibles(prestamo_seleccionado[1])
 
         if existencias_disponibles <= 0:
+            logger.warning("Aprobacion bloqueada por falta de existencias: prestamo_id=%s", prestamo_seleccionado[0])
             print("No hay existencias disponibles para aprobar este préstamo.")
             print("Debe rechazar la solicitud o esperar a que se devuelva una unidad del equipo.")
             return
@@ -191,6 +202,7 @@ def administrar_prestamos():
 
     # Guardar los cambios en bd_prestamos.csv
     guardar_prestamos(prestamos)
+    logger.info("Prestamo actualizado: prestamo_id=%s estado=%s", prestamo_seleccionado[0], prestamo_seleccionado[5])
                        
 def devolver_prestamo(prestamo_id):
     prestamos = leer_prestamos()
@@ -202,6 +214,7 @@ def devolver_prestamo(prestamo_id):
                 try:
                     fecha_hasta = datetime.strptime(row[4], "%Y-%m-%d").date()
                 except ValueError:
+                    logger.warning("Devolucion bloqueada por fecha invalida: prestamo_id=%s", row[0])
                     print("La fecha de devolución del préstamo no tiene un formato válido.")
                     return
 
@@ -209,6 +222,7 @@ def devolver_prestamo(prestamo_id):
                 multa = 1 if dias_atraso > 14 else 0
 
                 if not auth.aplicar_multa(row[2], multa):
+                    logger.warning("Devolucion bloqueada por usuario inexistente: prestamo_id=%s", row[0])
                     print("No se encontró el usuario asociado al préstamo.")
                     return
 
@@ -220,12 +234,15 @@ def devolver_prestamo(prestamo_id):
                     print("El usuario tiene una multa por atraso mayor a dos semanas.")
                 break
             else:
+                logger.warning("Devolucion bloqueada por prestamo inactivo: prestamo_id=%s", row[0])
                 print("El préstamo no está activo y no puede ser devuelto.")
                 return
 
     if not prestamo_encontrado:
+        logger.warning("Devolucion bloqueada por prestamo inexistente")
         print("No se encontró un préstamo con el ID proporcionado.")
         return
 
     # Guardar los cambios en bd_prestamos.csv
     guardar_prestamos(prestamos)
+    logger.info("Prestamo devuelto: prestamo_id=%s usuario_id=%s multa=%s", row[0], row[2], multa)
