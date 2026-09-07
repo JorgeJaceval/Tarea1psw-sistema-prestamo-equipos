@@ -12,14 +12,15 @@ python main.py
 
 Si tu instalación usa `python3` o `py`, reemplaza `python` en los comandos. Ejecuta siempre desde la carpeta del proyecto, porque ahí se buscan `bd_equipos.csv` y `bd_prestamos.csv`.
 
+## Usuarios
+
+El programa no publica usuarios ni contraseñas en el código. Al primer inicio, si no existe `bd_usuarios.csv`, el sistema solicita crear un administrador inicial por consola.
+
+
+
 ## Para probarlo
 
-Al iniciar, escribe `1` para entrar. Puedes usar estas cuentas:
-
-| Rol | Usuario | Contraseña |
-| --- | --- | --- |
-| Administrador | `admin` | `admin123` |
-| Usuario | `juan` | `juan123` |
+Al iniciar, escribe `1` para entrar con el administrador local que creaste.
 
 El administrador gestiona usuarios, equipos y préstamos. La opción `6` muestra los préstamos activos.
 
@@ -27,7 +28,7 @@ El usuario puede consultar equipos, pedir préstamos y revisar sus solicitudes. 
 
 Para salir, escribe `0` en el menú de tu cuenta o `2` en la pantalla inicial. Para cambiar de cuenta, vuelve a ejecutar el programa.
 
-Los cambios de equipos y préstamos quedan guardados en los CSV. Los usuarios nuevos, los cambios de rol y las multas se mantienen solo mientras el programa está abierto; al reiniciarlo se cargan otra vez los valores de `auth.py`.
+Los cambios de equipos y préstamos quedan guardados en los CSV. Los usuarios, roles y multas quedan guardados localmente en `bd_usuarios.csv`.
 
 ## Dónde está cada cosa
 

@@ -1,54 +1,101 @@
 from getpass import getpass
+import csv
+import hashlib
+import hmac
 import logging
+from pathlib import Path
+import secrets
 
 logger = logging.getLogger(__name__)
-'''
-"admin" : {
-    "id" : 1,
-    "password" : "hash",
-    "rol" : "admin",
-    "multa" : 0
-}
-'''
-autenticacion_simple = {
-    "admin": {
-        "id" : 1,
-        "password": "admin123",
-        "rol": "admin",
-        "multa": 0
-    },
-    "joaco": {
-        "id" : 2,
-        "password": "joaco123",
-        "rol": "user",
-        "multa": 1
-    },
-    "juan": {
-        "id" : 3,
-        "password": "juan123",
-        "rol": "user",
-        "multa": 0
-    },
-    "maria": {
-        "id" : 4,
-        "password": "maria123",
-        "rol": "user",
-        "multa": 0
-    },
-    "pedro": {
-        "id" : 5,
-        "password": "pedro123",
-        "rol": "user",
-        "multa": 0
-    },
-    "ana": {
-        "id" : 6,
-        "password": "ana123",
-        "rol": "user",
-        "multa": 0
-    }
+ARCHIVO_USUARIOS = Path("bd_usuarios.csv")
+ITERACIONES_HASH = 100_000
 
-}
+autenticacion_simple = {}
+
+
+def crear_hash_password(password, salt=None):
+    if salt is None:
+        salt = secrets.token_hex(16)
+
+    password_hash = hashlib.pbkdf2_hmac(
+        "sha256",
+        password.encode("utf-8"),
+        salt.encode("utf-8"),
+        ITERACIONES_HASH
+    ).hex()
+
+    return salt, password_hash
+
+
+def verificar_password(password, salt, password_hash):
+    _, hash_ingresado = crear_hash_password(password, salt)
+    return hmac.compare_digest(hash_ingresado, password_hash)
+
+
+def cargar_usuarios():
+    autenticacion_simple.clear()
+
+    if not ARCHIVO_USUARIOS.exists():
+        return
+
+    with open(ARCHIVO_USUARIOS, "r", newline="") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if len(row) >= 6:
+                user = row[0]
+                autenticacion_simple[user] = {
+                    "id": int(row[1]),
+                    "salt": row[2],
+                    "password_hash": row[3],
+                    "rol": row[4],
+                    "multa": int(row[5])
+                }
+
+
+def guardar_usuarios():
+    with open(ARCHIVO_USUARIOS, "w", newline="") as file:
+        writer = csv.writer(file)
+        for user, datos in autenticacion_simple.items():
+            writer.writerow([
+                user,
+                datos["id"],
+                datos["salt"],
+                datos["password_hash"],
+                datos["rol"],
+                datos["multa"]
+            ])
+
+
+def crear_admin_inicial():
+    print("No hay usuarios registrados. Cree el administrador inicial.")
+
+    while True:
+        user = input("Ingrese nombre de administrador: ").strip()
+        password = getpass("Ingrese contraseña del administrador: ")
+
+        if not user or not password:
+            print("Error: Usuario y contraseña no pueden estar vacíos.")
+            continue
+
+        salt, password_hash = crear_hash_password(password)
+        autenticacion_simple[user] = {
+            "id": 1,
+            "salt": salt,
+            "password_hash": password_hash,
+            "rol": "admin",
+            "multa": 0
+        }
+        guardar_usuarios()
+        logger.info("Administrador inicial creado: usuario_id=1")
+        print("Administrador inicial creado correctamente.\n")
+        return
+
+
+def inicializar_autenticacion():
+    cargar_usuarios()
+
+    if not autenticacion_simple:
+        crear_admin_inicial()
 
 def obtener_siguiente_id_usuario():
     mayor_id = 0
@@ -82,12 +129,16 @@ def register ():
         
         #Todos los usuarios registrados tendrán el rol de "user" por defecto.
         
+        salt, password_hash = crear_hash_password(password)
+
         autenticacion_simple[user] = {
             "id": obtener_siguiente_id_usuario(),
-            "password": password,
+            "salt": salt,
+            "password_hash": password_hash,
             "rol": "user",
             "multa": 0
         }
+        guardar_usuarios()
 
         logger.info("Usuario registrado: usuario_id=%s", autenticacion_simple[user]["id"])
         print("Registro exitoso. Ahora puede iniciar sesión.")
@@ -97,7 +148,7 @@ def register ():
 
 def login (user, password):
     #Lógica de inicio de sesión simple.
-    if user in autenticacion_simple and autenticacion_simple[user]["password"] == password:
+    if user in autenticacion_simple and verificar_password(password, autenticacion_simple[user]["salt"], autenticacion_simple[user]["password_hash"]):
         logger.info("Inicio de sesion: usuario_id=%s rol=%s", autenticacion_simple[user]["id"], autenticacion_simple[user]["rol"])
         print("Inicio de sesión exitoso.\n ")
         return True
@@ -124,6 +175,7 @@ def aplicar_multa(user_id, multa):
         return False
 
     autenticacion_simple[user]["multa"] = multa
+    guardar_usuarios()
     logger.info("Multa actualizada: usuario_id=%s multa=%s", autenticacion_simple[user]["id"], multa)
     return True
 
@@ -168,6 +220,7 @@ def administrar_usuarios():
     if accion == "1":
         user_id = autenticacion_simple[user1]["id"]
         del autenticacion_simple[user1]
+        guardar_usuarios()
         logger.info("Usuario eliminado: usuario_id=%s", user_id)
         print("Usuario eliminado correctamente.")
 
@@ -179,6 +232,7 @@ def administrar_usuarios():
             return
 
         autenticacion_simple[user1]["rol"] = nuevo_rol
+        guardar_usuarios()
         logger.info("Rol actualizado: usuario_id=%s rol=%s", autenticacion_simple[user1]["id"], nuevo_rol)
         print("Rol actualizado correctamente.")
 
