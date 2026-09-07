@@ -1,6 +1,11 @@
 #Interfaz Menú via CLI.
 import auth
 import prestamos
+from datetime import date
+import logging
+from monitoreo import configurar_monitoreo
+
+logger = logging.getLogger(__name__)
 
 def menu_admin ():
     #Funcionalidades: Registrar y administrar usuarios
@@ -46,6 +51,8 @@ def menu_admin ():
             print("Consultando equipos existentes...")
             equipos = prestamos.mostrar_equipos_disponibles()
 
+            logger.info("Consulta de equipos disponibles: cantidad=%s", len(equipos))
+
             if not equipos:
                 print("No hay equipos disponibles.")
                 continue
@@ -62,7 +69,12 @@ def menu_admin ():
 
         if op == 6:
             print("Consultando préstamos existentes...")
-            prestamos.prestamos_activos_total()
+            prestamos_activos = prestamos.prestamos_activos_total()
+            logger.info("Consulta de préstamos activos: cantidad=%s", len(prestamos_activos))
+            if not prestamos_activos:
+                print("No hay préstamos activos.")
+            for prestamo in prestamos_activos:
+                print(f"ID: {prestamo[0]} | Equipo: {prestamo[1]} | ID usuario: {prestamo[2]} | Estado: {prestamo[5]}")
             continue
 
         if op == 7:
@@ -130,6 +142,7 @@ def menu_usuario (user_id):
             print("Consultando equipos disponibles...")
             #Ir a la base de datos y consultar los equipos disponibles
             equipos = prestamos.mostrar_equipos_disponibles()
+            logger.info("Consulta de equipos: usuario_id=%s cantidad=%s", user_id, len(equipos))
 
             if not equipos:
                 print("No hay equipos disponibles.")
@@ -144,6 +157,7 @@ def menu_usuario (user_id):
         if op == 2:
             #Comprobar antes si tiene prestamos atrasados
             if auth.autenticacion_simple[auth.obtener_usuario_por_id(user_id)]["multa"] > 0:
+                logger.warning("Solicitud bloqueada por multa: usuario_id=%s", user_id)
                 print("No puede solicitar nuevos préstamos debido a que tiene una multa impuesta. \n")
                 continue
 
@@ -151,12 +165,17 @@ def menu_usuario (user_id):
             #Ir a la base de datos y comprobar si tiene prestamos atrasados
             #Si tiene prestamos atrasados, no puede solicitar nuevos prestamos.
             prestamos_activos = prestamos.prestamos_activos(user_id)
+            if any(date.fromisoformat(prestamo[4]) < date.today() for prestamo in prestamos_activos):
+                logger.warning("Solicitud bloqueada por préstamo vencido: usuario_id=%s", user_id)
+                print("No puede solicitar nuevos préstamos porque tiene un préstamo vencido. Debe devolverlo primero.")
+                continue
             prestamos_pendientes = prestamos.prestamos_pendientes(user_id)
 
             if len(prestamos_activos + prestamos_pendientes) == 0:
                 print("No tiene préstamos activos y/o pendientes. \n")
                 
             elif len(prestamos_activos + prestamos_pendientes) >= 3:
+                logger.warning("Solicitud bloqueada por límite de préstamos: usuario_id=%s", user_id)
                 print("El máximo son 3 prestamos. No puede solicitar nuevos préstamos hasta que devuelva / rechacen uno. \n")
                 continue
 
@@ -197,6 +216,7 @@ def menu_usuario (user_id):
         if op == 3:
             print("Consultando mis préstamos existentes / solicitudes...")
             prestamos_usuario = prestamos.prestamos_usuario(user_id)
+            logger.info("Consulta de préstamos: usuario_id=%s cantidad=%s", user_id, len(prestamos_usuario))
 
             if len(prestamos_usuario) == 0:
                 print("No tiene préstamos ni solicitudes registradas.")
@@ -235,5 +255,20 @@ def main ():
         menu_usuario(user_id)
 
 
+def ejecutar():
+    sentry = configurar_monitoreo()
+    logger.info("Inicio del sistema")
+    try:
+        main()
+    except Exception:
+        logger.exception("Error no controlado en el sistema")
+        print("Ocurrió un error. El detalle quedó guardado en logs/sistema.log.")
+        raise SystemExit(1)
+    finally:
+        logger.info("Cierre del sistema")
+        if sentry is not None:
+            sentry.flush(timeout=2)
+
+
 if __name__ == "__main__":
-    main()
+    ejecutar()

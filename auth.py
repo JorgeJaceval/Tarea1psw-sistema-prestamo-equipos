@@ -1,4 +1,7 @@
 from getpass import getpass
+import logging
+
+logger = logging.getLogger(__name__)
 '''
 "admin" : {
     "id" : 1,
@@ -86,6 +89,7 @@ def register ():
             "multa": 0
         }
 
+        logger.info("Usuario registrado: usuario_id=%s", autenticacion_simple[user]["id"])
         print("Registro exitoso. Ahora puede iniciar sesión.")
         return
 
@@ -94,9 +98,11 @@ def register ():
 def login (user, password):
     #Lógica de inicio de sesión simple.
     if user in autenticacion_simple and autenticacion_simple[user]["password"] == password:
+        logger.info("Inicio de sesion: usuario_id=%s rol=%s", autenticacion_simple[user]["id"], autenticacion_simple[user]["rol"])
         print("Inicio de sesión exitoso.\n ")
         return True
     else:
+        logger.warning("Intento de inicio de sesion fallido")
         print("Error: Nombre de usuario o contraseña incorrectos, intente nuevamente. \n")
         return False
 
@@ -114,9 +120,11 @@ def aplicar_multa(user_id, multa):
     user = obtener_usuario_por_id(user_id)
 
     if user is None:
+        logger.warning("No se pudo actualizar la multa: usuario inexistente")
         return False
 
     autenticacion_simple[user]["multa"] = multa
+    logger.info("Multa actualizada: usuario_id=%s multa=%s", autenticacion_simple[user]["id"], multa)
     return True
 
 
@@ -158,7 +166,9 @@ def administrar_usuarios():
     accion = input("Seleccione una acción: ")
 
     if accion == "1":
+        user_id = autenticacion_simple[user1]["id"]
         del autenticacion_simple[user1]
+        logger.info("Usuario eliminado: usuario_id=%s", user_id)
         print("Usuario eliminado correctamente.")
 
     elif accion == "2":
@@ -169,6 +179,7 @@ def administrar_usuarios():
             return
 
         autenticacion_simple[user1]["rol"] = nuevo_rol
+        logger.info("Rol actualizado: usuario_id=%s rol=%s", autenticacion_simple[user1]["id"], nuevo_rol)
         print("Rol actualizado correctamente.")
 
     elif accion == "0":
